@@ -38,7 +38,6 @@ class ProgramEnrollmentViewTests(APITestCase):
 
 
         response = self.client.post(self.url, json.dumps(post_data), content_type='application/json')
-        from pdb import set_trace; set_trace()
         self.assertEqual(response.status_code, 201)
 
         enrollments = ProgramEnrollment.objects.all()
@@ -52,3 +51,18 @@ class ProgramEnrollmentViewTests(APITestCase):
             self.assertEqual(actual_external_user_key, external_user_keys[i])
             self.assertEqual(actual_status, statuses[i])
             self.assertEqual(actual_curriculum_uuid, curriculum_uuids[i])
+    
+    def test_enrollment_payload_limit(self):
+        def student_enrollment(status):
+            return {
+                'status': status,
+                'external_user_key': str(uuid4().hex[0:10]),
+                'curriculum_uuid': str(uuid4())
+            }
+        post_data = []
+        for i in range(26):
+            post_data += student_enrollment('enrolled')
+
+        self.url = reverse('programs_api:v1:program_enrollments', args=[uuid4()])
+        response = self.client.post(self.url, json.dumps(post_data), content_type='application/json')
+        self.assertEqual(response.status_code, 413)

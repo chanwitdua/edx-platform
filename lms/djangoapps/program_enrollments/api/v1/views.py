@@ -16,9 +16,13 @@ class ProgramEnrollmentsView(APIView):
     """
 
     def post(self, request, *args, **kwargs):
-        # from pdb import set_trace; set_trace()
+        if len(request.data) > 25:
+            return Response(
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                content_type='application/json',
+            )
+
         for d in request.data:
-            # set_trace()
             data = {key: value for key, value in d.items()}
             data['program_uuid'] = kwargs['program_key']
             serializer = ProgramEnrollmentSerializer(data=data)
