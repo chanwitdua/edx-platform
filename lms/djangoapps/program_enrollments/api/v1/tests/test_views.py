@@ -18,7 +18,7 @@ class ProgramEnrollmentViewTests(APITestCase):
     Tests for the ProgramEnrollment view.
     """
 
-    def test_post_one_enrollment(self):
+    def test_successfully_post_enrollments(self):
         program_key = uuid4()
         statuses = ['pending', 'enrolled', 'pending']
         external_user_keys = ['abc1', 'efg2', 'hij3']
@@ -36,19 +36,19 @@ class ProgramEnrollmentViewTests(APITestCase):
 
         self.url = reverse('programs_api:v1:program_enrollments', args=[program_key])
 
-
         response = self.client.post(self.url, json.dumps(post_data), content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
-        enrollments = ProgramEnrollment.objects.all()
         for i in range(3):
-            actual_program_uuid = enrollments[i].program_uuid
-            actual_external_user_key = enrollments[i].external_user_key
-            actual_status = enrollments[i].status
-            actual_curriculum_uuid = enrollments[i].curriculum_uuid
-
-            self.assertEqual(actual_program_uuid, program_key)
+            enrollment = ProgramEnrollment.objects.filter(external_user_key=external_user_keys[i])[0]
+            actual_external_user_key = enrollment.external_user_key
             self.assertEqual(actual_external_user_key, external_user_keys[i])
+
+            actual_program_uuid = enrollment.program_uuid
+            actual_status = enrollment.status
+            actual_curriculum_uuid = enrollment.curriculum_uuid
+            
+            self.assertEqual(actual_program_uuid, program_key)
             self.assertEqual(actual_status, statuses[i])
             self.assertEqual(actual_curriculum_uuid, curriculum_uuids[i])
     
@@ -66,3 +66,25 @@ class ProgramEnrollmentViewTests(APITestCase):
         self.url = reverse('programs_api:v1:program_enrollments', args=[uuid4()])
         response = self.client.post(self.url, json.dumps(post_data), content_type='application/json')
         self.assertEqual(response.status_code, 413)
+    
+    def test_duplicate_enrollment(self):
+        def student_enrollment(status, external_user_key):
+            return {
+                'status': status,
+                'external_user_key': external_user_key or str(uuid4().hex[0:10]),
+                'curriculum_uuid': str(uuid4())
+            }
+        post_data = [
+            student_enrollment('enrolled', '001'),
+            student_enrollment('enrolled', '002'),
+            student_enrollment('enrolled', '001'),
+        ]
+        
+        self.url = reverse('programs_api:v1:program_enrollments', args=[uuid4()])
+        response = self.client.post(self.url, json.dumps(post_data), content_type='application/json')
+
+        self.assertEqual(response.status_code, 207)
+        self.assertEqual(response.data, {
+            '001': 'duplicated',
+            '002': 'enrolled',
+        })

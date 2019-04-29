@@ -80,7 +80,8 @@ class ProgramEnrollmentsView(APIView):
                 content_type='application/json',
             )
 
-        if len(request.data) != len(enrolled_students):
+        if len(request.data) != len(enrollments_to_create):
+            from pdb import set_trace; set_trace()
             return Response(
                 status=status.HTTP_207_MULTI_STATUS,
                 data=response_data,
