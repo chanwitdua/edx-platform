@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 import ddt
 from pytz import UTC
-from lms.djangoapps.grades.scores import compute_percent
+from lms.djangoapps.grades.api import compute_percent
 from six import text_type
 from xmodule import graders
 from xmodule.graders import (

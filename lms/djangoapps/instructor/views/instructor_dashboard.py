@@ -44,7 +44,7 @@ from lms.djangoapps.certificates.models import (
     GeneratedCertificate
 )
 from lms.djangoapps.courseware.module_render import get_module_by_usage_id
-from lms.djangoapps.grades.config.waffle import WRITABLE_GRADEBOOK, waffle_flags
+from lms.djangoapps.grades.api import is_writable_gradebook_enabled
 from openedx.core.djangoapps.course_groups.cohorts import DEFAULT_COHORT_NAME, get_course_cohorts, is_course_cohorted
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.verified_track_content.models import VerifiedTrackCohortedCourse
@@ -594,7 +594,7 @@ def _section_student_admin(course, access):
                                                           kwargs={'course_id': unicode(course_key)}),
         'spoc_gradebook_url': reverse('spoc_gradebook', kwargs={'course_id': unicode(course_key)}),
     }
-    if waffle_flags()[WRITABLE_GRADEBOOK].is_enabled(course_key) and settings.WRITABLE_GRADEBOOK_URL:
+    if is_writable_gradebook_enabled(course_key) and settings.WRITABLE_GRADEBOOK_URL:
         section_data['writable_gradebook_url'] = urljoin(settings.WRITABLE_GRADEBOOK_URL, '/' + text_type(course_key))
     return section_data
 

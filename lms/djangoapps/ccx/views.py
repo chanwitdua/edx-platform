@@ -48,7 +48,7 @@ from lms.djangoapps.ccx.utils import (
     get_enrollment_action_and_identifiers,
     parse_date,
 )
-from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
+from lms.djangoapps.grades.api import CourseGradeFactory
 from lms.djangoapps.instructor.enrollment import enroll_email, get_email_params
 from lms.djangoapps.instructor.views.gradebook_api import get_grade_book_page
 from student.models import CourseEnrollment

@@ -13,7 +13,7 @@ from lms.djangoapps.certificates.models import (
     CertificateStatuses
 )
 from lms.djangoapps.certificates.tasks import generate_certificate
-from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
+from lms.djangoapps.grades.api import CourseGradeFactory
 from lms.djangoapps.verify_student.services import IDVerificationService
 from openedx.core.djangoapps.certificates.api import auto_certificate_generation_enabled
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
