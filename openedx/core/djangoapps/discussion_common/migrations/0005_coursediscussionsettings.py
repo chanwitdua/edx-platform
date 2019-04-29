@@ -8,7 +8,7 @@ from opaque_keys.edx.django.models import CourseKeyField
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_comment_common', '0004_auto_20161117_1209'),
+        ('discussion_common', '0004_auto_20161117_1209'),
     ]
 
     operations = [

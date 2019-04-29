@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('django_comment_common', '0001_initial'),
+        ('discussion_common', '0001_initial'),
     ]
 
     operations = [

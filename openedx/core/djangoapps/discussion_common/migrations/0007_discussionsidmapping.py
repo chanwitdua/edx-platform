@@ -10,7 +10,7 @@ import opaque_keys.edx.django.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_comment_common', '0006_coursediscussionsettings_discussions_id_map'),
+        ('discussion_common', '0006_coursediscussionsettings_discussions_id_map'),
     ]
 
     operations = [

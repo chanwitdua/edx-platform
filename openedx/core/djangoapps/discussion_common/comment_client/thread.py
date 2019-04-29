@@ -1,11 +1,11 @@
+# pylint: disable=missing-docstring,protected-access
 import logging
 
-import settings
-
-import models
 from eventtracking import tracker
+from . import models
+from . import settings
+from . import utils
 
-import utils
 
 log = logging.getLogger(__name__)
 
@@ -112,19 +112,23 @@ class Thread(models.Model):
         )
 
     @classmethod
-    def url_for_threads(cls, params={}):
-        if params.get('commentable_id'):
-            return u"{prefix}/{commentable_id}/threads".format(prefix=settings.PREFIX, commentable_id=params['commentable_id'])
+    def url_for_threads(cls, params=None):
+        if params and params.get('commentable_id'):
+            return u"{prefix}/{commentable_id}/threads".format(
+                prefix=settings.PREFIX,
+                commentable_id=params['commentable_id'],
+            )
         else:
             return u"{prefix}/threads".format(prefix=settings.PREFIX)
 
     @classmethod
-    def url_for_search_threads(cls, params={}):
+    def url_for_search_threads(cls, params=None):
         return "{prefix}/search/threads".format(prefix=settings.PREFIX)
 
     @classmethod
-    def url(cls, action, params={}):
-
+    def url(cls, action, params=None):
+        if params is None:
+            params = {}
         if action in ['get_all', 'post']:
             return cls.url_for_threads(params)
         elif action == 'search':
@@ -159,8 +163,6 @@ class Thread(models.Model):
     def flagAbuse(self, user, voteable):
         if voteable.type == 'thread':
             url = _url_for_flag_abuse_thread(voteable.id)
-        elif voteable.type == 'comment':
-            url = _url_for_flag_comment(voteable.id)
         else:
             raise utils.CommentClientRequestError("Can only flag/unflag threads or comments")
         params = {'user_id': user.id}
@@ -176,8 +178,6 @@ class Thread(models.Model):
     def unFlagAbuse(self, user, voteable, removeAll):
         if voteable.type == 'thread':
             url = _url_for_unflag_abuse_thread(voteable.id)
-        elif voteable.type == 'comment':
-            url = _url_for_unflag_comment(voteable.id)
         else:
             raise utils.CommentClientRequestError("Can only flag/unflag for threads or comments")
         params = {'user_id': user.id}
