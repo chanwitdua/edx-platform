@@ -21,6 +21,7 @@ from waffle.testutils import override_flag
 from course_modes.models import CourseMode
 from course_modes.tests.factories import CourseModeFactory
 from courseware.tests.helpers import get_expiration_banner_text
+
 from django_comment_client.tests.factories import RoleFactory
 from django_comment_common.models import (
     FORUM_ROLE_ADMINISTRATOR,
@@ -408,6 +409,18 @@ class TestCourseHomePageAccess(CourseHomePageTestCase):
             params=expected_params.urlencode()
         )
         self.assertRedirects(response, expected_url)
+
+    def test_first_purchase_discount_banner(self):
+        """
+        Ensure first purchase discount banner displays correctly
+        """
+        user = self.create_user_for_course(self.course, CourseUserType.ENROLLED)
+        self.client.login(username=user.username, password=self.TEST_PASSWORD)
+        url = course_home_url(self.course)
+        response = self.client.get(url)
+        bannerText = '''<div class="first-purchase-discount-banner"><span class="first-purchase-discount-banner-bold">
+                     15% off your first upgrade.</span> Discount automatically applied.</div>'''
+        self.assertContains(response, bannerText, html=True)
 
     @mock.patch.dict(settings.FEATURES, {'DISABLE_START_DATES': False})
     def test_course_does_not_expire_for_verified_user(self):
