@@ -5,7 +5,9 @@ Django model specifications for the Program Enrollments API
 from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from opaque_keys.edx.django.models import CourseKeyField
 from simple_history.models import HistoricalRecords
@@ -29,6 +31,7 @@ class ProgramEnrollment(TimeStampedModel):  # pylint: disable=model-missing-unic
 
     class Meta(object):
         app_label = "program_enrollments"
+        unique_together = ('external_user_key', 'program_uuid', 'curriculum_uuid')
 
         # A student enrolled in a given (program, curriculum) should always
         # have a non-null ``user`` or ``external_user_key`` field (or both).
@@ -50,6 +53,23 @@ class ProgramEnrollment(TimeStampedModel):  # pylint: disable=model-missing-unic
     curriculum_uuid = models.UUIDField(db_index=True, null=False)
     status = models.CharField(max_length=9, choices=STATUSES)
     historical_records = HistoricalRecords()
+
+    def clean(self):
+        if not (self.user or self.external_user_key):
+            raise ValidationError(_('One of user or external_user_key must not be null.'))
+
+    @classmethod
+    def bulk_read_by_student_key(cls, program_uuid, student_data):
+        """
+        args:
+            program_uuid - The UUID of the program to read enrollment data of.
+            student_data - A dictionary keyed by external_user_key and
+            valued by a dict containing the curriculum_uuid for the user in the given program.
+        """
+        return cls.objects.filter(
+            program_uuid=program_uuid,
+            external_user_key__in=student_data.keys(),
+        )
 
     @classmethod
     def retire_user(cls, user_id):
